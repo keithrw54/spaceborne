@@ -128,7 +128,11 @@ module Airborne
     rescue RestClient::ServerBrokeConnection => e
       raise e
     rescue RestClient::Exception => e
-      e.response
+      if [301, 302].include?(e.response.code)
+        e.response.follow_redirection
+      else
+        e.response
+      end
     end
 
     private
