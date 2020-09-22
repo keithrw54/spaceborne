@@ -118,13 +118,18 @@ module Airborne
       end
     end
 
-    def make_request(method, url, options = {})
+    def pre_request(options)
       @json_body = nil
       local_options = split_options(options)
       handle_proxy(options, local_options)
       hdrs = calc_headers(options, local_options)
       @request_body = calc_body(options, local_options)
-      send_restclient(method, get_url(url), @request_body, hdrs)
+      [hdrs, @request_body]
+    end
+
+    def make_request(method, url, options = {})
+      hdrs, body = pre_request(options)
+      send_restclient(method, get_url(url), body, hdrs)
     rescue RestClient::ServerBrokeConnection => e
       raise e
     rescue RestClient::Exception => e
@@ -155,16 +160,16 @@ module Airborne
       end
     end
 
-    def exception_path_adder(path)
+    def exception_path_adder(args)
       yield
     rescue Airborne::ExpectationError => e
-      e.message << " at location #{path}"
+      e.message << "expect arguments: #{args}"
       raise e
     end
 
     def expect_json_types(*args)
       call_with_relative_path(json_body, args) do |param, body|
-        exception_path_adder(args[0]) do
+        exception_path_adder(args) do
           expect_json_types_impl(param, body)
         end
       end
@@ -172,7 +177,7 @@ module Airborne
 
     def expect_json(*args)
       call_with_relative_path(json_body, args) do |param, body|
-        exception_path_adder(args[0]) do
+        exception_path_adder(args) do
           expect_json_impl(param, body)
         end
       end
@@ -180,7 +185,7 @@ module Airborne
 
     def expect_header_types(*args)
       call_with_relative_path(response.headers, args) do |param, body|
-        exception_path_adder(args[0]) do
+        exception_path_adder(args) do
           expect_json_types_impl(param, body)
         end
       end
@@ -188,7 +193,7 @@ module Airborne
 
     def expect_header(*args)
       call_with_relative_path(response.headers, args) do |param, body|
-        exception_path_adder(args[0]) do
+        exception_path_adder(args) do
           expect_json_impl(param, body)
         end
       end
@@ -225,18 +230,22 @@ module Airborne
       end
     end
 
-    def get_by_path(path, json, &block)
+    def iterate_path(path)
       raise PathError, "Invalid Path, contains '..'" if /\.\./ =~ path
 
-      type = false
       parts = path.to_s.split('.')
       parts.each_with_index do |part, index|
+        yield(parts, part, index)
+      end
+    end
+
+    def get_by_path(path, json, type = false, &block)
+      iterate_path(path) do |parts, part, index|
         if %w[* ?].include?(part)
           ensure_array_or_hash(path, json)
           type = part
-          if index < parts.length.pred
-            walk_with_path(type, index, path, parts, json, &block) && return
-          end
+          walk_with_path(type, index, path, parts, json, &block) && return if index < parts.length.pred
+
           next
         end
         json = do_process_json(part, json)
