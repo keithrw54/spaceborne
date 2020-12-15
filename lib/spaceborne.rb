@@ -163,7 +163,7 @@ module Airborne
     def exception_path_adder(args)
       yield
     rescue Airborne::ExpectationError => e
-      e.message << "expect arguments: #{args}"
+      e.message << "\nexpect arguments: #{args}"
       raise e
     end
 
