@@ -34,12 +34,11 @@ module Spaceborne
   def response_body
     return '' if response.request.method.casecmp('head').zero?
 
-    str = if json?(response.headers)
-            "  JSON_BODY\n#{JSON.pretty_generate(json_body)}\n"
-          else
-            "  BODY\n#{response.body}\n"
-          end
-    str
+    if json?(response.headers)
+      "  JSON_BODY\n#{JSON.pretty_generate(json_body)}\n"
+    else
+      "  BODY\n#{response.body}\n"
+    end
   end
 
   def request_info(str = "\n")
@@ -133,8 +132,8 @@ module Airborne
     rescue RestClient::ServerBrokeConnection => e
       raise e
     rescue RestClient::Exception => e
-      if [301, 302].include?(e.response.code)
-        e.response.follow_redirection
+      if [301, 302].include?(e.response&.code)
+        e.response.&follow_redirection
       else
         e.response
       end
@@ -214,9 +213,9 @@ module Airborne
       when 'Array'
         expect_all(json, &block)
       when 'Hash'
-        json.each do |k, _v|
-          yield json[k]
-        end
+        json.each { |k, _v| yield json[k] }
+      else
+        raise ExpectationError, "expected array or hash, got #{json.class.name}"
       end
     end
 
