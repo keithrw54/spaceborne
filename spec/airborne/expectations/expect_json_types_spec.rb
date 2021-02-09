@@ -19,6 +19,13 @@ describe 'expect_json_types' do
     expect_json_types(name: :string, age: :int, optional: :bool_or_null)
   end
 
+  it 'should fail when optional property is not correct type' do
+    mock_get('simple_get1')
+    get '/simple_get1'
+    expect { expect_json_types(name: :string, age: :int, optional: :bool_or_null) }
+      .to raise_error(ExpectationNotMetError)
+  end
+
   it 'should allow full object graph' do
     mock_get('simple_path_get')
     get '/simple_path_get'

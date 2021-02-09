@@ -1,0 +1,6 @@
+{
+    "name": "Alex",
+    "age": 32,
+    "address": null,
+    "optional": "string"
+}
