@@ -205,8 +205,9 @@ Validation for headers follows the same pattern as above, although nesting of mu
   * `expect_header_types same arguments/handling as expect_json_types`
 5. It is possible to use non-json data in a request
 6. Expectations on a response with an array of hashes with keys that are unknown, but that have a defined structure are supported (using the '*' in a path)
+7. Responses that have header with Content-Encoding of gzip are gunzip'd in json_body
 
-The following example shows how this works
+The following example shows how extension # 6 works
 
 ```ruby
 { "array_of_hashes": [
