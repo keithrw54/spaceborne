@@ -58,8 +58,16 @@ end
 
 # monkeypatch Airborne
 module Airborne
+  def decode_body
+    if response.headers[:content_encoding]&.include?('gzip')
+      Zlib::Inflate.new(32 + Zlib::MAX_WBITS).inflate(response.body)
+    else
+      response.body
+    end
+  end
+
   def json_body
-    @json_body ||= JSON.parse(response.body, symbolize_names: true)
+    @json_body ||= JSON.parse(decode_body, symbolize_names: true)
   rescue StandardError
     raise InvalidJsonError, 'Api request returned invalid json'
   end
