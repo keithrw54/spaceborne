@@ -167,16 +167,16 @@ module Airborne
       end
     end
 
-    def exception_path_adder(args)
+    def exception_path_adder(args, body)
       yield
-    rescue Airborne::ExpectationError => e
-      e.message << "\nexpect arguments: #{args}"
+    rescue RSpec::Expectations::ExpectationNotMetError, Airborne::ExpectationError => e
+      e.message << "\nexpect arguments: #{args}\ndata element: #{body}"
       raise e
     end
 
     def expect_json_types(*args)
       call_with_relative_path(json_body, args) do |param, body|
-        exception_path_adder(args) do
+        exception_path_adder(args, body) do
           expect_json_types_impl(param, body)
         end
       end
@@ -184,7 +184,7 @@ module Airborne
 
     def expect_json(*args)
       call_with_relative_path(json_body, args) do |param, body|
-        exception_path_adder(args) do
+        exception_path_adder(args, body) do
           expect_json_impl(param, body)
         end
       end
@@ -192,7 +192,7 @@ module Airborne
 
     def expect_header_types(*args)
       call_with_relative_path(response.headers, args) do |param, body|
-        exception_path_adder(args) do
+        exception_path_adder(args, body) do
           expect_json_types_impl(param, body)
         end
       end
@@ -200,7 +200,7 @@ module Airborne
 
     def expect_header(*args)
       call_with_relative_path(response.headers, args) do |param, body|
-        exception_path_adder(args) do
+        exception_path_adder(args, body) do
           expect_json_impl(param, body)
         end
       end
