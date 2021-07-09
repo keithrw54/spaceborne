@@ -26,7 +26,7 @@ module Spaceborne
   end
 
   def add_response
-    "RESPONSE: #{response.code}\n"\
+    "\nRESPONSE: #{response.code}\n"\
     "  HEADERS:\n#{JSON.pretty_generate(response.headers)}\n"\
     << response_body
   end
