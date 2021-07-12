@@ -51,8 +51,7 @@ module Spaceborne
   rescue Exception => e
     raise e unless response
 
-    e.message << request_info
-    raise e
+    raise ExpectationNotMetError.new(e.message + request_info)
   end
 end
 
