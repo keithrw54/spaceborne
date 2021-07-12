@@ -51,7 +51,7 @@ module Spaceborne
   rescue Exception => e
     raise e unless response
 
-    raise ExpectationNotMetError.new(e.message + request_info)
+    raise RSpec::Expectations::ExpectationNotMetError.new(e.message + request_info)
   end
 end
 
