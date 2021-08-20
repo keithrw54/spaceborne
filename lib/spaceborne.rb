@@ -51,7 +51,7 @@ module Spaceborne
   rescue Exception => e
     raise e unless response
 
-    raise RSpec::Expectations::ExpectationNotMetError.new(e.message + request_info)
+    raise RSpec::Expectations::ExpectationNotMetError, e.message + request_info
   end
 end
 
@@ -227,44 +227,75 @@ module Airborne
     end
 
     def handle_type(type, path, json, &block)
-      if type == '*'
+      case type
+      when '*'
         handle_container(json, &block)
-      elsif type == '?'
+      when '?'
         expect_one(path, json, &block)
       else
         yield json
       end
     end
 
-    def iterate_path(path)
-      raise PathError, "Invalid Path, contains '..'" if /\.\./ =~ path
+    def path_to_s(path)
+      path.is_a?(Airborne::OptionalHashTypeExpectations) ? path.hash.to_s : path
+    end
 
-      parts = path.to_s.split('.')
-      parts.each_with_index do |part, index|
-        yield(parts, part, index)
+    def make_path_optional(path, sub_path)
+      if path.is_a?(Airborne::OptionalHashTypeExpectations)
+        Airborne::OptionalHashTypeExpectations.new(sub_path)
+      else
+        sub_path
       end
     end
 
-    def get_by_path(path, json, type = false, &block)
+    def iterate_path(path)
+      raise PathError, "Invalid Path, contains '..'" if /\.\./ =~ path_to_s(path)
+
+      parts = path_to_s(path).to_s.split('.')
+      parts.each_with_index do |part, index|
+        use_part = make_path_optional(path, part)
+        yield(parts, use_part, index)
+      end
+    end
+
+    def get_by_path(path, json, type: false, &block)
       iterate_path(path) do |parts, part, index|
-        if %w[* ?].include?(part)
+        if %w[* ?].include?(path_to_s(part))
           ensure_array_or_hash(path, json)
           type = part
           walk_with_path(type, index, path, parts, json, &block) && return if index < parts.length.pred
 
           next
         end
-        json = do_process_json(part, json)
+        json = do_process_json(path_to_s(part), json)
       end
       handle_type(type, path, json, &block)
     end
 
     def ensure_array_or_hash(path, json)
-      return if json.class == Array || json.class == Hash
+      return if json.instance_of?(Array) || json.instance_of?(Hash)
 
       raise RSpec::Expectations::ExpectationNotMetError,
             "Expected #{path} to be array or hash, got #{json.class}"\
             ' from JSON response'
+    end
+
+    def walk_with_path(type, index, path, parts, json, &block)
+      last_error = nil
+      item_count = json.length
+      error_count = 0
+      json.each do |element|
+        begin
+          sub_path = parts[(index.next)...(parts.length)].join('.')
+          get_by_path(make_path_optional(path, sub_path), element, &block)
+        rescue Exception => e
+          last_error = e
+          error_count += 1
+        end
+        ensure_match_all(last_error) if type == '*'
+        ensure_match_one(path, item_count, error_count) if type == '?'
+      end
     end
   end
 end

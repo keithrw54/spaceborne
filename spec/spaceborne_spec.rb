@@ -24,7 +24,7 @@ describe Spaceborne do
           expect_status(200)
           expect_json(name: 'Alexandra')
         end
-      end .to raise_error(RSpec::Expectations::ExpectationNotMetError)
+      end.to raise_error(RSpec::Expectations::ExpectationNotMetError)
     end
     specify do
       expect do
@@ -34,14 +34,14 @@ describe Spaceborne do
           expect_status(200)
           expect_json(name: 'Alexandra')
         end
-      end .to raise_error(RSpec::Expectations::ExpectationNotMetError)
+      end.to raise_error(RSpec::Expectations::ExpectationNotMetError)
     end
     specify do
       expect do
         wrap_request do
           expect(1).to eq(2)
         end
-      end .to raise_error(RSpec::Expectations::ExpectationNotMetError)
+      end.to raise_error(RSpec::Expectations::ExpectationNotMetError)
     end
   end
   context 'readme examples' do
@@ -76,6 +76,16 @@ describe Spaceborne do
       expect_json_types('array_of_hashes.*.*', first: :string, last: :string)
       expect_json_types('hash_of_hashes.*', first: :string, last: :string)
     end
+    it 'optional lowest level array element' do
+      mock_get('spaceborne_readme_2')
+      get '/spaceborne_readme_2'
+      expect_json_types(optional('lowest_array.*.array.*'), present: :string)
+    end
+    it 'optional highest level array element' do
+      mock_get('spaceborne_readme_2')
+      get '/spaceborne_readme_2'
+      expect_json_types(optional('highest_array.*.array.*'), present: :string)
+    end
   end
   it 'header expectations follow spaceborne format' do
     mock_get('spaceborne_readme_2', foo: 'bar')
@@ -94,7 +104,6 @@ describe Spaceborne do
     expect_header(nonjson_data: nil)
     expect_header('Content-Type' => nil)
   end
-
   it 'gives information about path on failure' do
     mock_get('simple_path_get')
     get '/simple_path_get'

@@ -206,26 +206,35 @@ Validation for headers follows the same pattern as above, although nesting of mu
 5. It is possible to use non-json data in a request
 6. Expectations on a response with an array of hashes with keys that are unknown, but that have a defined structure are supported (using the '*' in a path)
 7. Responses that have header with Content-Encoding of gzip are gunzip'd in json_body
+8. For type checks specified in a path containing array(s), you can make the path optional, so that if the data is present it is type checked, but an empty array or element without the array is fine
 
-The following example shows how extension # 6 works
+The following example shows how extensions # 6 & 8 work
 
 ```ruby
 { "array_of_hashes": [
-   { "husband": {"first": "fred", "last": "flinstone"}},
-   { "buddy": {"first": "barney", "last": "rubble"}},
-   { "wife": {"first": "wilma", "last": "flinstone"}}
+    { "husband": {"first": "fred", "last": "flinstone"}},
+    { "buddy": {"first": "barney", "last": "rubble"}},
+    { "wife": {"first": "wilma", "last": "flinstone"}}
   ],
   "hash_of_hashes": 
-   { "husband": {"first": "fred", "last": "flinstone"},
-     "buddy": {"first": "barney", "last": "rubble"},
-     "wife": {"first": "wilma", "last": "flinstone"}
-  }
+  { "husband": {"first": "fred", "last": "flinstone"},
+    "buddy": {"first": "barney", "last": "rubble"},
+    "wife": {"first": "wilma", "last": "flinstone"}
+  },
+  "lowest_array": [{ "array": [{ "present": "name" }]},
+		   { "array": null },
+		   { "array": [] },
+		   { "foo": "bar" }],
+  "highest_array": [ null,
+		     { "array": [{ "present": "name" }]}]
 }
 ```
 You can now validate the fact that each element in the collection has a key which is variant, but a value that has a defined format (the first and last field values are strings).
 
     expect_json_types('array_of_hashes.*.*', first: :string, last: :string)
     expect_json_types('hash_of_hashes.*', first: :string, last: :string)
+	expect_json_types(optional('lowest_array.*.array.*'), present: :string)
+	expect_json_types(optional('highest_array.*.array.*'), present: :string)
 
 
 ## Development

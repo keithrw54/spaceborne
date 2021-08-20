@@ -1,11 +1,19 @@
 { "array_of_hashes": [
-   { "husband": {"first": "fred", "last": "flinstone"}},
-   { "buddy": {"first": "barney", "last": "rubble"}},
-   { "wife": {"first": "wilma", "last": "flinstone"}}
+    { "husband": {"first": "fred", "last": "flinstone"}},
+    { "buddy": {"first": "barney", "last": "rubble"}},
+    { "wife": {"first": "wilma", "last": "flinstone"}}
   ],
   "hash_of_hashes": 
-   { "husband": {"first": "fred", "last": "flinstone"},
-     "buddy": {"first": "barney", "last": "rubble"},
-     "wife": {"first": "wilma", "last": "flinstone"}
-  }
+  { "husband": {"first": "fred", "last": "flinstone"},
+    "buddy": {"first": "barney", "last": "rubble"},
+    "wife": {"first": "wilma", "last": "flinstone"}
+  },
+  "lowest_array": [{ "array": [{ "present": "name" }]},
+		   { "array": null },
+		   { "array": [] },
+		   { "foo": "bar" }],
+  "highest_array": [ null,
+		     { "array": [{ "present": "name" }]}]
 }
+      
+  
