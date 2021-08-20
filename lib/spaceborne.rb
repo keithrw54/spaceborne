@@ -156,6 +156,22 @@ module Airborne
 
   # Extend airborne's expectations
   module RequestExpectations
+    class OptionalPathExpectations
+      def initialize(string)
+        @string = string
+      end
+      def to_s
+        @string.to_s
+      end
+    end
+
+    def do_process_json(part, json)
+      json = process_json(part, json)
+    rescue StandardError
+      raise PathError,
+            "Expected #{json.class}\nto be an object with property #{part}"
+    end
+
     def call_with_relative_path(data, args)
       if args.length == 2
         get_by_path(args[0], data) do |json_chunk|
@@ -204,17 +220,18 @@ module Airborne
         end
       end
     end
+
+    def optional(data)
+      if data.is_a?(Hash)
+        OptionalHashTypeExpectations.new(data)
+      else
+        OptionalPathExpectations.new(data)
+      end
+    end
   end
 
   # extension to handle hash value checking
   module PathMatcher
-    def do_process_json(part, json)
-      json = process_json(part, json)
-    rescue StandardError
-      raise PathError,
-            "Expected #{json.class}\nto be an object with property #{part}"
-    end
-
     def handle_container(json, &block)
       case json.class.name
       when 'Array'
@@ -237,38 +254,34 @@ module Airborne
       end
     end
 
-    def path_to_s(path)
-      path.is_a?(Airborne::OptionalHashTypeExpectations) ? path.hash.to_s : path
-    end
-
-    def make_path_optional(path, sub_path)
-      if path.is_a?(Airborne::OptionalHashTypeExpectations)
-        Airborne::OptionalHashTypeExpectations.new(sub_path)
+    def make_sub_path_optional(path, sub_path)
+      if path.is_a?(Airborne::OptionalPathExpectations)
+        Airborne::OptionalPathExpectations.new(sub_path)
       else
         sub_path
       end
     end
 
     def iterate_path(path)
-      raise PathError, "Invalid Path, contains '..'" if /\.\./ =~ path_to_s(path)
+      raise PathError, "Invalid Path, contains '..'" if /\.\./ =~ path.to_s
 
-      parts = path_to_s(path).to_s.split('.')
+      parts = path.to_s.split('.')
       parts.each_with_index do |part, index|
-        use_part = make_path_optional(path, part)
+        use_part = make_sub_path_optional(path, part)
         yield(parts, use_part, index)
       end
     end
 
     def get_by_path(path, json, type: false, &block)
       iterate_path(path) do |parts, part, index|
-        if %w[* ?].include?(path_to_s(part))
+        if %w[* ?].include?(part.to_s)
           ensure_array_or_hash(path, json)
           type = part
           walk_with_path(type, index, path, parts, json, &block) && return if index < parts.length.pred
 
           next
         end
-        json = do_process_json(path_to_s(part), json)
+        json = do_process_json(part.to_s, json)
       end
       handle_type(type, path, json, &block)
     end
@@ -288,7 +301,7 @@ module Airborne
       json.each do |element|
         begin
           sub_path = parts[(index.next)...(parts.length)].join('.')
-          get_by_path(make_path_optional(path, sub_path), element, &block)
+          get_by_path(make_sub_path_optional(path, sub_path), element, &block)
         rescue Exception => e
           last_error = e
           error_count += 1
