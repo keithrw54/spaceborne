@@ -246,7 +246,7 @@ module Airborne
     end
 
     def handle_type(type, path, json, &block)
-      case type
+      case type.to_s
       when '*'
         handle_container(json, &block)
       when '?'
@@ -275,19 +275,16 @@ module Airborne
     end
 
     def shortcut_validation(path, json)
-      return true if json.nil? && path.is_a?(Airborne::OptionalPathExpectations)
-
-      ensure_array_or_hash(path, json)
-      false
+      json.nil? && path.is_a?(Airborne::OptionalPathExpectations)
     end
 
     def get_by_path(path, json, type: false, &block)
       iterate_path(path) do |parts, part, index|
-        if %w[* ?].include?(part.to_s)
-          return if shortcut_validation(path, json)
+        return if shortcut_validation(path, json)
 
+        if %w[* ?].include?(part.to_s)
           type = part
-          walk_with_path(type, index, path, parts, json, &block) && return if index < parts.length.pred
+          walk_with_path(type.to_s, index, path, parts, json, &block) && return if index < parts.length.pred
 
           next
         end

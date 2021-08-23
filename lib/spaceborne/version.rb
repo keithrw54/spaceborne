@@ -1,3 +1,3 @@
 module Spaceborne
-  VERSION = '0.1.39'.freeze
+  VERSION = '0.1.40'.freeze
 end
