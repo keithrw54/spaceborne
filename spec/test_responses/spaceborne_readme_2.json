@@ -13,7 +13,8 @@
 		   { "array": [] },
 		   { "foo": "bar" }],
   "highest_array": [ null,
-		     { "array": [{ "present": "name" }]}]
+		     { "array": [{ "present": "name" }]}],
+  "not_an_array": null
 }
       
   

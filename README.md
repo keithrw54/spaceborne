@@ -226,15 +226,16 @@ The following example shows how extensions # 6 & 8 work
 		   { "array": [] },
 		   { "foo": "bar" }],
   "highest_array": [ null,
-		     { "array": [{ "present": "name" }]}]
+		     { "array": [{ "present": "name" }]}],
+  "not_an_array":  null
 }
 ```
 You can now validate the fact that each element in the collection has a key which is variant, but a value that has a defined format (the first and last field values are strings).
 
     expect_json_types('array_of_hashes.*.*', first: :string, last: :string)
     expect_json_types('hash_of_hashes.*', first: :string, last: :string)
-	expect_json_types(optional('lowest_array.*.array.*'), present: :string)
-	expect_json_types(optional('highest_array.*.array.*'), present: :string)
+    expect_json_types(optional('lowest_array.*.array.*'), present: :string)
+    expect_json_types(optional('highest_array.*.array.*'), present: :string)
 
 
 ## Development

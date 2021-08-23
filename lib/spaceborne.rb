@@ -156,10 +156,12 @@ module Airborne
 
   # Extend airborne's expectations
   module RequestExpectations
+    # class used for holding an optional path
     class OptionalPathExpectations
       def initialize(string)
         @string = string
       end
+
       def to_s
         @string.to_s
       end
@@ -272,10 +274,18 @@ module Airborne
       end
     end
 
+    def shortcut_validation(path, json)
+      return true if json.nil? && path.is_a?(Airborne::OptionalPathExpectations)
+
+      ensure_array_or_hash(path, json)
+      false
+    end
+
     def get_by_path(path, json, type: false, &block)
       iterate_path(path) do |parts, part, index|
         if %w[* ?].include?(part.to_s)
-          ensure_array_or_hash(path, json)
+          return if shortcut_validation(path, json)
+
           type = part
           walk_with_path(type, index, path, parts, json, &block) && return if index < parts.length.pred
 

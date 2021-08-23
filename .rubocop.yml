@@ -1,3 +1,6 @@
+AllCops:
+  SuggestExtensions: false
+
 Style/FrozenStringLiteralComment:
   Enabled: false
 
@@ -23,7 +26,7 @@ Metrics/ClassLength:
   Exclude:
     - 'bin/*'
 
-Metrics/LineLength:
+Layout/LineLength:
   Exclude:
     - 'spec/airborne/**/*.rb'
 
