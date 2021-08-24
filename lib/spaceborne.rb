@@ -227,7 +227,7 @@ module Airborne
       if data.is_a?(Hash)
         OptionalHashTypeExpectations.new(data)
       else
-        OptionalPathExpectations.new(data)
+        Airborne::OptionalPathExpectations.new(data)
       end
     end
   end
