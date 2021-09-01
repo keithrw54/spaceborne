@@ -186,7 +186,9 @@ module Airborne
 
     def exception_path_adder(args, body)
       yield
-    rescue RSpec::Expectations::ExpectationNotMetError, Airborne::ExpectationError => e
+    rescue RSpec::Expectations::ExpectationNotMetError,
+           ExpectationError,
+           Airborne::ExpectationError => e
       e.message << "\nexpect arguments: #{args}\ndata element: #{body}"
       raise e
     end
@@ -301,14 +303,20 @@ module Airborne
             ' from JSON response'
     end
 
+    def handle_missing_errors(type, path, sub_path, element, &block)
+      exception_path_adder({ type: type, path: sub_path }, element) do
+        get_by_path(make_sub_path_optional(path, sub_path), element, &block)
+      end
+    end
+
     def walk_with_path(type, index, path, parts, json, &block)
       last_error = nil
       item_count = json.length
       error_count = 0
       json.each do |element|
+        sub_path = parts[(index.next)...(parts.length)].join('.')
         begin
-          sub_path = parts[(index.next)...(parts.length)].join('.')
-          get_by_path(make_sub_path_optional(path, sub_path), element, &block)
+          handle_missing_errors(type, path, sub_path, element, &block)
         rescue Exception => e
           last_error = e
           error_count += 1
