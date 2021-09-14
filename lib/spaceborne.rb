@@ -236,21 +236,21 @@ module Airborne
 
   # extension to handle hash value checking
   module PathMatcher
-    def handle_container(json, &block)
+    def handle_container(path, json, &block)
       case json.class.name
       when 'Array'
         expect_all(json, &block)
       when 'Hash'
         json.each { |k, _v| yield json[k] }
       else
-        raise ExpectationError, "expected array or hash, got #{json.class.name}"
+        raise ExpectationError, "expected array or hash at #{path}, got #{json.class.name}"
       end
     end
 
     def handle_type(type, path, json, &block)
       case type.to_s
       when '*'
-        handle_container(json, &block)
+        handle_container(path, json, &block)
       when '?'
         expect_one(path, json, &block)
       else

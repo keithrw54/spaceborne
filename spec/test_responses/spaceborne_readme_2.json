@@ -14,7 +14,9 @@
 		   { "foo": "bar" }],
   "highest_array": [ null,
 		     { "array": [{ "present": "name" }]}],
-  "not_an_array": null
+  "not_an_array": null,
+  "second_optional": { "key1": [{ "key2": null },
+				{ "key2": { "key3": null, "key4": "abc" }}]}
 }
       
-  
+// {"data":{"icmAccountPreferences":{"edges":[{"cursor":null,"node":{"accountId":"crn:2017:aws-account/3367254362284","createdById":null,"createdOn":null,"dryRun":false,"expectedUsageTrend":null,"expectedWorkloadStability":null,"id":"crn:2017:inline-cost-management/AWS-preference:3367254362284","lastUpdatedBy":null,"lastUpdatedOn":null,"name":"Redshirt 2","onboarded":false,"prePayBudget":null,"riskAffinity":null}},{"cursor":null,"node":{"accountId":"crn:2017:aws-account/3367254377911","createdById":null,"createdOn":null,"dryRun":true,"expectedUsageTrend":null,"expectedWorkloadStability":null,"id":"crn:2017:inline-cost-management/AWS-preference:3367254377911","lastUpdatedBy":null,"lastUpdatedOn":"2021-09-13T18:12:31Z","name":"Redshirt","onboarded":true,"prePayBudget":null,"riskAffinity":null}}],"pageInfo":{"endCursor":null,"hasNextPage":false,"hasPreviousPage":false,"startCursor":null}}}}

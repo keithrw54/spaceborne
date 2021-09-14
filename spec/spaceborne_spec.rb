@@ -91,6 +91,13 @@ describe Spaceborne do
       get '/spaceborne_readme_2'
       expect_json_types(optional('not_an_array.*'), present: :string)
     end
+    it 'optional for path second level hash key is null' do
+      mock_get('spaceborne_readme_2')
+      get '/spaceborne_readme_2'
+      expect_json_types('second_optional.key1.*', key2: :object_or_null)
+      expect_json_types('second_optional.key1.*.key2', optional(key3: :string_or_null,
+                                                                key4: :string_or_null))
+    end
   end
   it 'header expectations follow spaceborne format' do
     mock_get('spaceborne_readme_2', foo: 'bar')
