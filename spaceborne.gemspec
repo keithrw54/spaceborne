@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'activesupport'
   spec.add_runtime_dependency 'airborne', '~> 0.3'
   spec.add_runtime_dependency 'curlyrest', '~> 0.1.30'
-  spec.add_runtime_dependency 'rack'
+  spec.add_runtime_dependency 'rack', '~> 2.2.3.1'
   spec.add_runtime_dependency 'rack-test', '~> 1.1', '<= 2.0'
   spec.add_runtime_dependency 'rest-client', '< 3.0', '>= 1.7.3'
   spec.add_runtime_dependency 'rspec', '~> 3.8'
