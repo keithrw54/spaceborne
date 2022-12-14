@@ -26,19 +26,19 @@ $ gem install spaceborne
 
 ### Making a request
 
-Spaceborne/airborne use curlyrest/rest-client to make the API requests. These are done in the manner that you actually think about the request, the http action verb, the url, headers, and body(optional depending on the verb). When creating a test, you can call any of the following methods: get, post, put, patch, delete, head, options.
+Spaceborne/airborne use curlyrest/rest-client to make the API requests. These are done in the manner that you actually think about the request, the http action verb, the url, body(optional depending on the verb) and headers. When creating a test, you can call any of the following methods: get, post, put, patch, delete, head, options.
 
 #### Parts of a request
 
 | part | description | restrictions |
 |:--- |:----|:----|
 |url|uri describing destination of the request|not including query/fragment|
-|headers|hash of request headers|*optional request modifiers*|
 |body|data being passed in the request|not on head/get requests|
+|headers|hash of request headers|*optional request modifiers*|
 |query|data passed on url after '?'|added as a 'params' hash in headers|
 
 #### Optional request modifiers
-These are passed as headers, but will be removed from the actual request, taking the desired effect.
+These are passed as headers, but will be removed from the actual request, having the desired effect.
 
 | modifier | values | effect|
 |:---|:---|:---|
@@ -89,7 +89,7 @@ describe 'simple get sample' do
   end
 end
 ```
-The parts of the example outside of the `wrap_request` block are typical rspec. The `wrap_request` is a spaceborne concept, saying that if anything fails inside of that block, then the failure contains the request, response, as well as why it failed. This is to work around the issue of an expectation failing, and having good info about why, but having no idea what the request or response were that caused the failure. The actual request is done on the `get` line. Validation of the response is the following `expect_*` lines.
+The parts of the example outside of the `wrap_request` block are typical rspec. The `wrap_request` is a spaceborne concept, saying that if anything fails inside of that block, then the failure contains the last request, response, as well as why it failed. This is to work around the issue of an expectation failing, and having good info about why, but having no idea what the request or response were that caused the failure. The actual request is done on the `get` line. Validation of the response is the following `expect_*` lines.
 
 #### Parts of response to validate
 
@@ -198,8 +198,8 @@ Validation for headers follows the same pattern as above, although nesting of mu
 ## Extensions to Airborne
 
 1. Uses curlyrest to allow extension of rest-client with curl requests
-2. Uses wrap_request to bundle groups of expectations so that if any fail, the failure will contain the request and response, rather than just seeing the expectation that failed
-3. json_body is only parsed once after a request rather than on each expect call (spaceborne resets the body on a new http request).
+2. Uses wrap_request to bundle groups of expectations so that if any fail, the failure will contain the last request and response, rather than just seeing the expectation that failed
+3. json_body is only parsed once after a request rather than on each expect call (spaceborne resets the json_body on a new http request).
 4. Expectations for headers use the same form as the expectations for json bodies.
   * `expect_header same arguments/handling as expect_json`
   * `expect_header_types same arguments/handling as expect_json_types`
